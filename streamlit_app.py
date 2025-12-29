@@ -34,14 +34,14 @@ df = parse_data("chat.txt")
 # --- FILTRES DYNAMIQUES (SIDEBAR) ---
 st.sidebar.header("⚙️ Configuration")
 
-# Ajout du bouton d'upload pour l'option "Refresh" manuelle
-st.sidebar.subheader("📤 Mettre à jour les données")
-uploaded_file = st.sidebar.file_uploader("Glisser un nouvel export chat.txt", type="txt")
+# # Ajout du bouton d'upload pour l'option "Refresh" manuelle
+# st.sidebar.subheader("📤 Mettre à jour les données")
+# uploaded_file = st.sidebar.file_uploader("Glisser un nouvel export chat.txt", type="txt")
 
-if uploaded_file is not None:
-    # On pourrait adapter la fonction pour lire directement le contenu uploadé
-    # Pour l'instant on garde le fonctionnement standard
-    st.sidebar.info("Fichier reçu ! (Nécessite intégration lecture directe)")
+# if uploaded_file is not None:
+#     # On pourrait adapter la fonction pour lire directement le contenu uploadé
+#     # Pour l'instant on garde le fonctionnement standard
+#     st.sidebar.info("Fichier reçu ! (Nécessite intégration lecture directe)")
 
 st.sidebar.subheader("Joueurs à afficher")
 joueurs_disponibles = sorted(df['Joueur'].unique())
