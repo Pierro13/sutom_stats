@@ -34,17 +34,24 @@ df = parse_data("chat.txt")
 # --- FILTRES DYNAMIQUES (SIDEBAR) ---
 st.sidebar.header("⚙️ Configuration")
 
+# Ajout du bouton d'upload pour l'option "Refresh" manuelle
+st.sidebar.subheader("📤 Mettre à jour les données")
+uploaded_file = st.sidebar.file_uploader("Glisser un nouvel export chat.txt", type="txt")
+
+if uploaded_file is not None:
+    # On pourrait adapter la fonction pour lire directement le contenu uploadé
+    # Pour l'instant on garde le fonctionnement standard
+    st.sidebar.info("Fichier reçu ! (Nécessite intégration lecture directe)")
+
 st.sidebar.subheader("Joueurs à afficher")
 joueurs_disponibles = sorted(df['Joueur'].unique())
 selection_joueurs = []
 
-# Création des Checkboxes dynamiquement
 for j in joueurs_disponibles:
-    is_checked = st.sidebar.checkbox(j, value=True) # "value=True" pour qu'ils soient cochés par défaut
+    is_checked = st.sidebar.checkbox(j, value=True)
     if is_checked:
         selection_joueurs.append(j)
 
-# Filtrage du DataFrame selon les cases cochées
 df_filtre = df[df['Joueur'].isin(selection_joueurs)]
 
 # --- TITRE ---
@@ -54,25 +61,19 @@ if not selection_joueurs:
     st.warning("Veuillez cocher au moins un joueur dans la barre latérale.")
     st.stop()
 
-# --- SECTION 1 : CLASSEMENT (Moyenne Croissante) ---
+# --- SECTION 1 : CLASSEMENT (Pleine largeur) ---
 st.header("🥇 Classement par performance")
-col1, col2 = st.columns([2, 1])
 
-with col1:
-    # On calcule les stats demandées
-    stats = df_filtre.groupby("Joueur").agg(
-        Moyenne_Tentatives=("Score", "mean"),
-        Parties_Postées=("Score", "count")
-    ).sort_values("Moyenne_Tentatives") # Trié par le meilleur (le plus petit score)
-    
-    stats['Moyenne_Tentatives'] = stats['Moyenne_Tentatives'].round(2)
-    
-    st.dataframe(stats, use_container_width=True)
+# Calcul des stats
+stats = df_filtre.groupby("Joueur").agg(
+    Moyenne_Tentatives=("Score", "mean"),
+    Parties_Postées=("Score", "count")
+).sort_values("Moyenne_Tentatives")
 
-with col2:
-    st.subheader("💡 Records")
-    best_player = stats.index[0]
-    st.success(f"**Le Maître :** {best_player} 🎯")
+stats['Moyenne_Tentatives'] = stats['Moyenne_Tentatives'].round(2)
+
+# Affichage sur toute la largeur
+st.dataframe(stats, use_container_width=True)
 
 # --- SECTION 2 : ÉVOLUTION DYNAMIQUE ---
 st.header("📈 Évolution des scores")
@@ -86,7 +87,7 @@ fig_evol = px.line(
     labels={"value": "Score moyen (lissé)", "Date": "Jour"},
     template="plotly_white"
 )
-# Inverser l'axe Y pour que le "1" (meilleur score) soit en haut
+# Inverser l'axe Y pour que le "1" soit en haut
 fig_evol.update_yaxes(autorange="reversed")
 st.plotly_chart(fig_evol, use_container_width=True)
 
@@ -98,7 +99,7 @@ fig_heure = px.histogram(
     color="Joueur", 
     nbins=24, 
     barmode="group",
-    labels={"Heure_H": "Heure de la journée (0-23h)"},
+    labels={"Heure_H": "Heure (0-23h)"},
     template="plotly_white"
 )
 st.plotly_chart(fig_heure, use_container_width=True)
